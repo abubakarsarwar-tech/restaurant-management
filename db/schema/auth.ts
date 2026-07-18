@@ -1,7 +1,9 @@
 import { relations } from "drizzle-orm";
 import {
   boolean,
+  check,
   index,
+  inet,
   pgTable,
   primaryKey,
   text,
@@ -10,6 +12,7 @@ import {
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
 
 import { createdOnly, id, timestamps } from "./utils";
 import { userStatusEnum } from "./enums";
@@ -142,6 +145,39 @@ export const userRoles = pgTable(
   ],
 );
 
+// ── Auth Sessions (refresh-token rotation) ─────────────────────────────────
+// One row per active device session. The refresh JWT carries only { sub, t,
+// sid }; its SHA-256 hash lives here, so sessions are revocable per device
+// and every refresh rotates (old row revoked) with reuse detection.
+// Exactly one of (userId, customerId) — staff or storefront identity.
+export const authSessions = pgTable(
+  "auth_sessions",
+  {
+    id: id(),
+    userId: uuid("user_id").references(() => users.id, { onDelete: "cascade" }),
+    customerId: uuid("customer_id"), // FK declared in customers domain (avoids cycle)
+    refreshTokenHash: text("refresh_token_hash").notNull(),
+    userAgent: text("user_agent"),
+    ipAddress: inet("ip_address"),
+    expiresAt: timestamp("expires_at", { withTimezone: true, mode: "date" }).notNull(),
+    revokedAt: timestamp("revoked_at", { withTimezone: true, mode: "date" }),
+    lastUsedAt: timestamp("last_used_at", { withTimezone: true, mode: "date" }),
+    ...timestamps,
+  },
+  (t) => [
+    index("auth_sessions_user_idx").on(t.userId),
+    index("auth_sessions_customer_idx").on(t.customerId),
+    // Sweep/active-session lookups hit only live rows.
+    index("auth_sessions_active_idx")
+      .on(t.userId, t.expiresAt)
+      .where(sql`${t.revokedAt} is null`),
+    check(
+      "auth_sessions_identity_chk",
+      sql`num_nonnulls(${t.userId}, ${t.customerId}) = 1`,
+    ),
+  ],
+);
+
 // ── Relations ───────────────────────────────────────────────────────────────
 export const permissionsRelations = relations(permissions, ({ many }) => ({
   rolePermissions: many(rolePermissions),
@@ -173,6 +209,14 @@ export const usersRelations = relations(users, ({ one, many }) => ({
     references: [mediaAssets.id],
   }),
   userRoles: many(userRoles),
+  authSessions: many(authSessions),
+}));
+
+export const authSessionsRelations = relations(authSessions, ({ one }) => ({
+  user: one(users, {
+    fields: [authSessions.userId],
+    references: [users.id],
+  }),
 }));
 
 export const userRolesRelations = relations(userRoles, ({ one }) => ({

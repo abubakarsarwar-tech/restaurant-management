@@ -289,11 +289,31 @@ async function main() {
       description: "Live order board only",
     },
   );
+  const cashierRole = await getOrCreate(
+    roles,
+    and(eq(roles.name, "Cashier"), eq(roles.restaurantId, restaurant.id)),
+    {
+      restaurantId: restaurant.id,
+      name: "Cashier",
+      description: "POS/counter: orders + customers",
+    },
+  );
+  const riderRole = await getOrCreate(
+    roles,
+    and(eq(roles.name, "Rider"), eq(roles.restaurantId, restaurant.id)),
+    {
+      restaurantId: restaurant.id,
+      name: "Rider",
+      description: "Assigned deliveries: read + advance",
+    },
+  );
 
   const rolePerms: Record<string, string[]> = {
     [ownerRole.id]: [...permIdByKey.keys()],
-    [managerRole.id]: [...permIdByKey.keys()].filter((k) => !k.startsWith("staff:")),
+    [managerRole.id]: [...permIdByKey.keys()].filter((k) => k !== "staff:manage"),
+    [cashierRole.id]: ["orders:read", "orders:update", "catalog:read", "customers:read"],
     [kitchenRole.id]: ["orders:read", "orders:update", "catalog:read"],
+    [riderRole.id]: ["orders:read", "orders:update"],
   };
   for (const [roleId, keys] of Object.entries(rolePerms)) {
     for (const key of keys) {

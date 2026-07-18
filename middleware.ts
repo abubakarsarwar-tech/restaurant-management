@@ -1,11 +1,11 @@
 import { chain, withSecurityHeaders } from "@/middleware/chain";
+import { withAuthGuard } from "@/middleware/with-auth-guard";
 
 /**
- * Root middleware — currently applies security headers.
- * Auth guard, locale routing and rate limiting plug into the chain
- * (see middleware/chain.ts) in their respective parts.
+ * Root middleware — security headers for everything, then the auth gate
+ * for protected prefixes (see middleware/with-auth-guard.ts).
  */
-export default chain([withSecurityHeaders]);
+export default chain([withSecurityHeaders, withAuthGuard]);
 
 export const config = {
   /*

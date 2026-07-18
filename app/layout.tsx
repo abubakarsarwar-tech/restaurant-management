@@ -4,22 +4,13 @@ import { siteConfig } from "@/config/site";
 import { fontSans, fontDisplay } from "@/lib/fonts";
 import { cn } from "@/lib/utils";
 import { Providers } from "@/providers";
-import { SiteHeader, SiteFooter } from "@/components/layout";
 
 import "./globals.css";
 
 /**
- * Root layout — the single shell every page renders inside.
- *
- *   <Providers>  → theme, TanStack Query, tooltips, global toast
- *   <SiteHeader> → sticky glass nav (customer site placeholder)
- *   <main>       → routed content (flex-1 keeps footer pinned)
- *   <SiteFooter> → config-driven footer
- *
- * The admin dashboard will introduce its own route-group layout
- * (app/(admin)/admin/layout.tsx) with a sidebar INSTEAD of this header —
- * route groups let each surface have its own chrome without ejecting
- * from the shared providers below.
+ * Root layout — document shell + provider composition ONLY.
+ * Chrome (header/footer, dashboard shell, auth backdrop) is owned by the
+ * route-group layouts: (site) | (auth) | (admin).
  */
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000"),
@@ -59,11 +50,7 @@ export default function RootLayout({
           fontDisplay.variable,
         )}
       >
-        <Providers>
-          <SiteHeader />
-          <main className="flex-1">{children}</main>
-          <SiteFooter />
-        </Providers>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );
