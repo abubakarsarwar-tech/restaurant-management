@@ -1,0 +1,22 @@
+// ── Prisma Schema ────────────────────────────────────────────────────────────
+// Database: MySQL 8   ·   Prisma 7 (Rust-free client + driver adapters)
+//
+// ⚠️  PART 1 FOUNDATION: intentionally NO models/tables yet.
+// The data model (Users, Products, Categories, Orders, OrderItems, …)
+// is designed and added in a later part. Until then this file pins the
+// datasource + generator so the toolchain is verified end-to-end.
+//
+// Notes (Prisma 7):
+//  • Connection URLs no longer live here — Migrate reads prisma.config.ts,
+//    and the runtime client connects through a driver adapter (lib/prisma.ts).
+//  • The `prisma-client` generator emits plain TypeScript you can read,
+//    into lib/generated/prisma (gitignored) — run `pnpm db:generate`.
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "mysql"
+}

@@ -1,0 +1,328 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ----------------------------------------------------------------------------
+   DESIGN SYSTEM — "Warm & Premium"
+   Pillars: appetizing flame-orange brand, deep basil secondary, warm paper
+   neutrals, generous soft radii, layered warm shadows, sharp micro-motion.
+   Dark mode is class-based (next-themes) via the `dark` custom variant.
+---------------------------------------------------------------------------- */
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* ----- Color: surfaces & text (warm paper neutral scale) -------------- */
+  --background: hsl(36 33% 98%);
+  --foreground: hsl(24 24% 12%);
+  --card: hsl(0 0% 100%);
+  --card-foreground: hsl(24 24% 12%);
+  --popover: hsl(0 0% 100%);
+  --popover-foreground: hsl(24 24% 12%);
+
+  /* ----- Color: brand ---------------------------------------------------- */
+  /* Primary — flame orange. Appetite-stimulating, energetic: CTA/add-to-cart */
+  --primary: hsl(22 93% 50%);
+  --primary-foreground: hsl(0 0% 100%);
+  /* Secondary — deep basil green: trust, freshness, veg; secondary CTAs    */
+  --secondary: hsl(152 58% 27%);
+  --secondary-foreground: hsl(84 45% 96%);
+  /* Accent — warm cream/sand: chips, hover surfaces, subtle highlights     */
+  --accent: hsl(36 72% 93%);
+  --accent-foreground: hsl(24 45% 20%);
+  /* Muted — disabled/skeleton/subtle surfaces                              */
+  --muted: hsl(35 24% 93%);
+  --muted-foreground: hsl(28 10% 42%);
+
+  /* ----- Color: semantic states ------------------------------------------ */
+  --success: hsl(152 62% 32%);
+  --success-foreground: hsl(0 0% 100%);
+  --warning: hsl(38 92% 42%);
+  --warning-foreground: hsl(30 60% 14%);
+  --destructive: hsl(0 74% 50%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --info: hsl(210 82% 48%);
+  --info-foreground: hsl(0 0% 100%);
+
+  /* ----- Color: chrome --------------------------------------------------- */
+  --border: hsl(32 16% 88%);
+  --input: hsl(32 16% 84%);
+  --ring: hsl(22 93% 50%);
+
+  /* ----- Color: data viz (analytics) ------------------------------------- */
+  --chart-1: hsl(22 93% 50%);
+  --chart-2: hsl(152 58% 34%);
+  --chart-3: hsl(38 92% 45%);
+  --chart-4: hsl(210 82% 52%);
+  --chart-5: hsl(340 65% 52%);
+
+  /* ----- Color: admin sidebar -------------------------------------------- */
+  --sidebar: hsl(24 24% 10%);
+  --sidebar-foreground: hsl(36 24% 92%);
+  --sidebar-primary: hsl(22 93% 50%);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
+  --sidebar-accent: hsl(24 20% 16%);
+  --sidebar-accent-foreground: hsl(36 24% 92%);
+  --sidebar-border: hsl(24 16% 20%);
+  --sidebar-ring: hsl(22 93% 55%);
+
+  /* ----- Radius (soft, friendly — base 12px) ----------------------------- */
+  --radius: 0.75rem;
+
+  /* ----- Elevation (warm-tinted layered shadows) -------------------------- */
+  --shadow-2xs: 0 1px 2px 0 hsl(24 30% 20% / 0.05);
+  --shadow-xs: 0 1px 3px 0 hsl(24 30% 20% / 0.07);
+  --shadow-sm: 0 1px 2px 0 hsl(24 30% 20% / 0.06), 0 1px 3px 1px hsl(24 30% 20% / 0.05);
+  --shadow-md:
+    0 2px 4px -1px hsl(24 30% 20% / 0.06), 0 4px 8px -2px hsl(24 30% 20% / 0.07);
+  --shadow-lg:
+    0 4px 6px -2px hsl(24 30% 20% / 0.05), 0 10px 18px -4px hsl(24 30% 20% / 0.1);
+  --shadow-xl:
+    0 8px 10px -4px hsl(24 30% 20% / 0.06), 0 20px 30px -8px hsl(24 30% 20% / 0.14);
+  --shadow-2xl: 0 25px 50px -12px hsl(24 30% 20% / 0.28);
+
+  /* ----- Motion (see Design System doc) ----------------------------------- */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-decelerate: cubic-bezier(0, 0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  --duration-fast: 150ms;
+  --duration-base: 200ms;
+  --duration-slow: 300ms;
+
+  /* ----- Layout ---------------------------------------------------------- */
+  --container-app: 80rem; /* 1280px — customer site max width       */
+  --container-admin: 90rem; /* 1440px — admin dashboard max width     */
+  --header-height: 4.5rem;
+}
+
+.dark {
+  --background: hsl(24 12% 7%);
+  --foreground: hsl(36 24% 93%);
+  --card: hsl(24 14% 9.5%);
+  --card-foreground: hsl(36 24% 93%);
+  --popover: hsl(24 14% 9.5%);
+  --popover-foreground: hsl(36 24% 93%);
+
+  --primary: hsl(22 95% 54%);
+  --primary-foreground: hsl(24 60% 8%);
+  --secondary: hsl(152 48% 34%);
+  --secondary-foreground: hsl(84 45% 96%);
+  --accent: hsl(24 18% 17%);
+  --accent-foreground: hsl(36 50% 88%);
+  --muted: hsl(24 14% 16%);
+  --muted-foreground: hsl(30 12% 62%);
+
+  --success: hsl(152 58% 45%);
+  --success-foreground: hsl(24 60% 8%);
+  --warning: hsl(38 92% 52%);
+  --warning-foreground: hsl(30 60% 10%);
+  --destructive: hsl(0 74% 58%);
+  --destructive-foreground: hsl(0 0% 100%);
+  --info: hsl(210 82% 58%);
+  --info-foreground: hsl(24 60% 8%);
+
+  --border: hsl(24 12% 18%);
+  --input: hsl(24 12% 22%);
+  --ring: hsl(22 95% 54%);
+
+  --chart-1: hsl(22 95% 56%);
+  --chart-2: hsl(152 55% 48%);
+  --chart-3: hsl(38 92% 55%);
+  --chart-4: hsl(210 82% 60%);
+  --chart-5: hsl(340 65% 60%);
+
+  --sidebar: hsl(24 14% 9%);
+  --sidebar-foreground: hsl(36 24% 88%);
+  --sidebar-primary: hsl(22 95% 54%);
+  --sidebar-primary-foreground: hsl(24 60% 8%);
+  --sidebar-accent: hsl(24 16% 15%);
+  --sidebar-accent-foreground: hsl(36 24% 88%);
+  --sidebar-border: hsl(24 12% 18%);
+  --sidebar-ring: hsl(22 95% 54%);
+
+  --shadow-2xs: 0 1px 2px 0 hsl(0 0% 0% / 0.3);
+  --shadow-xs: 0 1px 3px 0 hsl(0 0% 0% / 0.35);
+  --shadow-sm: 0 1px 2px 0 hsl(0 0% 0% / 0.3), 0 1px 3px 1px hsl(0 0% 0% / 0.3);
+  --shadow-md: 0 2px 4px -1px hsl(0 0% 0% / 0.3), 0 4px 8px -2px hsl(0 0% 0% / 0.35);
+  --shadow-lg: 0 4px 6px -2px hsl(0 0% 0% / 0.3), 0 10px 18px -4px hsl(0 0% 0% / 0.4);
+  --shadow-xl: 0 8px 10px -4px hsl(0 0% 0% / 0.3), 0 20px 30px -8px hsl(0 0% 0% / 0.45);
+  --shadow-2xl: 0 25px 50px -12px hsl(0 0% 0% / 0.6);
+}
+
+/* ----------------------------------------------------------------------------
+   TOKEN → TAILWIND MAPPING
+   Makes every token available as a utility class:
+   bg-primary, text-success, rounded-xl, shadow-lift, font-display, ...
+---------------------------------------------------------------------------- */
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-info: var(--info);
+  --color-info-foreground: var(--info-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+
+  /* Typography */
+  --font-sans:
+    var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    sans-serif;
+  --font-display: var(--font-playfair), Georgia, "Times New Roman", serif;
+
+  /* Radius scale derived from --radius (base 12px) */
+  --radius-sm: calc(var(--radius) - 4px); /* 8px  */
+  --radius-md: calc(var(--radius) - 2px); /* 10px */
+  --radius-lg: var(--radius); /* 12px */
+  --radius-xl: calc(var(--radius) + 4px); /* 16px */
+  --radius-2xl: calc(var(--radius) + 8px); /* 20px */
+
+  /* Shadow scale (warm-tinted) */
+  --shadow-2xs: var(--shadow-2xs);
+  --shadow-xs: var(--shadow-xs);
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+  --shadow-lg: var(--shadow-lg);
+  --shadow-xl: var(--shadow-xl);
+  --shadow-2xl: var(--shadow-2xl);
+
+  /* Brand entrance animation for hero/dish reveals */
+  --animate-fade-up: fade-up 500ms var(--ease-decelerate) both;
+  --animate-scale-in: scale-in 200ms var(--ease-decelerate) both;
+
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  @keyframes scale-in {
+    from {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   BASE LAYER — global element defaults
+---------------------------------------------------------------------------- */
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-background text-foreground min-h-screen font-sans antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
+  /* Sleek warm scrollbars */
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: var(--muted-foreground);
+    border-radius: 999px;
+    border: 2px solid var(--background);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--primary);
+  }
+}
+
+/* ----------------------------------------------------------------------------
+   UTILITIES — design-system helpers usable anywhere
+---------------------------------------------------------------------------- */
+@utility container-app {
+  width: 100%;
+  max-width: var(--container-app);
+  margin-inline: auto;
+  padding-inline: 1rem;
+  @media (min-width: 40rem) {
+    padding-inline: 1.5rem;
+  }
+  @media (min-width: 64rem) {
+    padding-inline: 2rem;
+  }
+}
+
+@utility container-admin {
+  width: 100%;
+  max-width: var(--container-admin);
+  margin-inline: auto;
+  padding-inline: 1rem;
+  @media (min-width: 40rem) {
+    padding-inline: 1.5rem;
+  }
+}
+
+@utility text-balance {
+  text-wrap: balance;
+}
+
+@utility shadow-lift {
+  transition:
+    box-shadow var(--duration-base) var(--ease-standard),
+    transform var(--duration-base) var(--ease-standard);
+  &:hover {
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+  }
+}

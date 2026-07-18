@@ -1,0 +1,31 @@
+# Local development infrastructure.
+# `pnpm db:up` starts MySQL 8 matching production's engine, no local install.
+# Volume `mysql-data` persists across restarts; healthcheck gates dependents.
+services:
+  mysql:
+    image: mysql:8.4
+    container_name: restaurant-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: restaurant_db
+      MYSQL_CHARSET: utf8mb4 # full Unicode: emoji in reviews, i18n dish names
+      MYSQL_COLLATION: utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-prootpassword"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks:
+      - restaurant-net
+
+volumes:
+  mysql-data:
+
+networks:
+  restaurant-net:
+    driver: bridge
