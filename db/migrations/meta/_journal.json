@@ -15,6 +15,13 @@
       "when": 1784335773949,
       "tag": "0001_fantastic_dagger",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784337278843,
+      "tag": "0002_overrated_the_anarchist",
+      "breakpoints": true
     }
   ]
 }

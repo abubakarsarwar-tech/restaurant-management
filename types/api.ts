@@ -28,6 +28,7 @@ export type ApiErrorCode =
   | "CONFLICT"
   | "VALIDATION_ERROR"
   | "RATE_LIMITED"
+  | "INTEGRATION_UNAVAILABLE"
   | "INTERNAL_ERROR";
 
 /** Cursor-based pagination scales better than OFFSET on huge menus/orders. */

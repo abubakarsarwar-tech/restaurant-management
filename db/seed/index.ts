@@ -406,12 +406,28 @@ async function main() {
   const catPizza = await getOrCreate(
     categories,
     and(eq(categories.restaurantId, restaurant.id), eq(categories.slug, "pizza")),
-    { restaurantId: restaurant.id, name: "Pizza", slug: "pizza", sortOrder: 1 },
+    {
+      restaurantId: restaurant.id,
+      name: "Pizza",
+      slug: "pizza",
+      icon: "pizza",
+      colorTheme: "flame",
+      isEditorsChoice: true,
+      sortOrder: 1,
+    },
   );
   const catBurgers = await getOrCreate(
     categories,
     and(eq(categories.restaurantId, restaurant.id), eq(categories.slug, "burgers")),
-    { restaurantId: restaurant.id, name: "Burgers", slug: "burgers", sortOrder: 2 },
+    {
+      restaurantId: restaurant.id,
+      name: "Burgers",
+      slug: "burgers",
+      icon: "burger",
+      colorTheme: "amber",
+      isEditorsChoice: true,
+      sortOrder: 2,
+    },
   );
   const catDesi = await getOrCreate(
     categories,
@@ -420,18 +436,34 @@ async function main() {
       restaurantId: restaurant.id,
       name: "Desi Classics",
       slug: "desi-classics",
+      icon: "rice",
+      colorTheme: "emerald",
       sortOrder: 3,
     },
   );
   const catDesserts = await getOrCreate(
     categories,
     and(eq(categories.restaurantId, restaurant.id), eq(categories.slug, "desserts")),
-    { restaurantId: restaurant.id, name: "Desserts", slug: "desserts", sortOrder: 4 },
+    {
+      restaurantId: restaurant.id,
+      name: "Desserts",
+      slug: "desserts",
+      icon: "cake",
+      colorTheme: "rose",
+      sortOrder: 4,
+    },
   );
   const catDrinks = await getOrCreate(
     categories,
     and(eq(categories.restaurantId, restaurant.id), eq(categories.slug, "drinks")),
-    { restaurantId: restaurant.id, name: "Drinks", slug: "drinks", sortOrder: 5 },
+    {
+      restaurantId: restaurant.id,
+      name: "Drinks",
+      slug: "drinks",
+      icon: "drinks",
+      colorTheme: "sky",
+      sortOrder: 5,
+    },
   );
 
   // media helper

@@ -64,6 +64,15 @@ export const categories = pgTable(
     imageMediaId: uuid("image_media_id").references(() => mediaAssets.id, {
       onDelete: "set null",
     }),
+    // Storefront presentation (Part 5): icon = lucide key, colorTheme = design
+    // token key from features/catalog/constants; banner = wide hero for the
+    // category page/slider stop.
+    icon: varchar("icon", { length: 60 }),
+    colorTheme: varchar("color_theme", { length: 24 }),
+    bannerMediaId: uuid("banner_media_id").references(() => mediaAssets.id, {
+      onDelete: "set null",
+    }),
+    isEditorsChoice: boolean("is_editors_choice").notNull().default(false),
     sortOrder: integer("sort_order").notNull().default(0),
     isActive: boolean("is_active").notNull().default(true),
     ...timestamps,
@@ -450,6 +459,12 @@ export const categoriesRelations = relations(categories, ({ one, many }) => ({
   image: one(mediaAssets, {
     fields: [categories.imageMediaId],
     references: [mediaAssets.id],
+    relationName: "category_image",
+  }),
+  banner: one(mediaAssets, {
+    fields: [categories.bannerMediaId],
+    references: [mediaAssets.id],
+    relationName: "category_banner",
   }),
   products: many(products),
 }));
