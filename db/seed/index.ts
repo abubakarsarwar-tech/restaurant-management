@@ -1396,6 +1396,111 @@ async function main() {
     },
   );
   console.log("✓ banner slides");
+
+  // 11 ── historical orders (14 days of sales so analytics/charts render) ────
+  const priorCount = await db.select({ id: orders.id }).from(orders).limit(12);
+  if (priorCount.length <= 3) {
+    const dayVariants = [
+      { product: pizza, variant: pizzaLarge },
+      { product: biryani, variant: biryaniVariant },
+      { product: burger, variant: burgerDouble },
+    ];
+    const statusCycle = [
+      "COMPLETED",
+      "COMPLETED",
+      "DELIVERED",
+      "COMPLETED",
+      "CANCELLED",
+    ] as const;
+
+    let created = 0;
+    for (let d = 13; d >= 1 && created < 16; d++) {
+      const ordersToday = (d * 7) % 3; // deterministic 0–2 orders/day
+      for (let k = 0; k < ordersToday && created < 16; k++) {
+        const pick = dayVariants[(d + k) % dayVariants.length];
+        const qty = ((d + k) % 2) + 1;
+        const isDelivery = (d + k) % 3 === 0;
+        const status = statusCycle[(d + k) % statusCycle.length];
+        const cancelled = status === "CANCELLED";
+
+        const line = qty * pick.variant.priceCents;
+        const fee = isDelivery ? 299 : 0;
+        const tax = Math.round((line * 600) / 10_000);
+        const total = line + fee + tax;
+        const placedAt = new Date(now - d * 86_400_000 - (k * 97 + 40) * 60_000);
+
+        const [row] = await db
+          .insert(orders)
+          .values({
+            restaurantId: restaurant.id,
+            branchId: mainBranch.id,
+            customerId: (d + k) % 2 === 0 ? sara.id : guest.id,
+            type: isDelivery ? "DELIVERY" : "TAKEAWAY",
+            status,
+            paymentStatus: cancelled ? "UNPAID" : "PAID",
+            subtotalCents: line,
+            deliveryFeeCents: fee,
+            taxCents: tax,
+            taxBreakdown: [{ name: "GST", rateBp: 600, amountCents: tax }],
+            totalCents: total,
+            currency: "USD",
+            deliveryZoneId: isDelivery ? downtownZone.id : null,
+            deliveryAddress: isDelivery
+              ? { line1: "Seed Street 1", area: "Old Town", city: "Foodtown" }
+              : null,
+            confirmedAt: cancelled ? null : placedAt,
+            completedAt:
+              status === "COMPLETED" || status === "DELIVERED" ? placedAt : null,
+            deliveredAt: status === "DELIVERED" ? placedAt : null,
+            cancelledAt: cancelled ? placedAt : null,
+            cancelReason: cancelled ? "Customer cancelled before acceptance" : null,
+            paidAt: cancelled ? null : placedAt,
+            createdAt: placedAt,
+            updatedAt: placedAt,
+          })
+          .returning({ id: orders.id });
+
+        await db.insert(orderItems).values({
+          orderId: row.id,
+          productId: pick.product.id,
+          variantId: pick.variant.id,
+          productName: pick.product.name,
+          variantName: pick.variant.name,
+          quantity: qty,
+          unitPriceCents: pick.variant.priceCents,
+          addons: [],
+          addonsTotalCents: 0,
+          lineTotalCents: line,
+        });
+
+        if (!cancelled) {
+          await db.insert(payments).values({
+            orderId: row.id,
+            method: "ONLINE",
+            provider: "stripe",
+            status: "PAID",
+            amountCents: total,
+            currency: "USD",
+            idempotencyKey: `seed-history-${row.id}`,
+            paidAt: placedAt,
+          });
+        }
+        created++;
+      }
+    }
+    await db.insert(notifications).values({
+      restaurantId: restaurant.id,
+      userId: manager.id,
+      type: "ORDER_PLACED",
+      channel: "IN_APP",
+      title: `${created} historical orders imported`,
+      body: "Demo sales history is ready for analytics.",
+    });
+    console.log(`✓ historical orders (${created})`);
+  } else {
+    console.log("↷ historical orders (already seeded)");
+  }
+
   console.log("🌱 seed complete.");
 }
 

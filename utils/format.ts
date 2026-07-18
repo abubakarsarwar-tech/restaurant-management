@@ -31,3 +31,23 @@ export function pluralize(count: number, singular: string, plural?: string): str
 export function formatOrderNumber(orderNumber: string): string {
   return orderNumber.startsWith("#") ? orderNumber : `#${orderNumber}`;
 }
+
+const RTF = new Intl.RelativeTimeFormat("en", { numeric: "auto" });
+
+/** "3 minutes ago" / "in 2 days" — Intl.RelativeTimeFormat over Date/ISO. */
+export function timeAgo(date: Date | string): string {
+  const then = typeof date === "string" ? new Date(date) : date;
+  const seconds = Math.round((then.getTime() - Date.now()) / 1000);
+  const abs = Math.abs(seconds);
+
+  if (abs < 60) return RTF.format(seconds, "seconds");
+  const minutes = Math.round(seconds / 60);
+  if (Math.abs(minutes) < 60) return RTF.format(minutes, "minutes");
+  const hours = Math.round(minutes / 60);
+  if (Math.abs(hours) < 24) return RTF.format(hours, "hours");
+  const days = Math.round(hours / 24);
+  if (Math.abs(days) < 30) return RTF.format(days, "days");
+  const months = Math.round(days / 30);
+  if (Math.abs(months) < 12) return RTF.format(months, "months");
+  return RTF.format(Math.round(months / 12), "years");
+}
