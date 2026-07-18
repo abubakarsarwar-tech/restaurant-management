@@ -1,22 +1,22 @@
 # Local development infrastructure.
-# `pnpm db:up` starts MySQL 8 matching production's engine, no local install.
-# Volume `mysql-data` persists across restarts; healthcheck gates dependents.
+# `pnpm db:up` starts PostgreSQL 17 matching production's engine, no local install.
+# Volume `pgdata` persists across restarts; healthcheck gates dependents.
+# Port 5433 on the host avoids clashing with a locally installed Postgres.
 services:
-  mysql:
-    image: mysql:8.4
-    container_name: restaurant-mysql
+  postgres:
+    image: postgres:17-alpine
+    container_name: restaurant-postgres
     restart: unless-stopped
     environment:
-      MYSQL_ROOT_PASSWORD: rootpassword
-      MYSQL_DATABASE: restaurant_db
-      MYSQL_CHARSET: utf8mb4 # full Unicode: emoji in reviews, i18n dish names
-      MYSQL_COLLATION: utf8mb4_unicode_ci
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: restaurant_db
     ports:
-      - "3306:3306"
+      - "5433:5432"
     volumes:
-      - mysql-data:/var/lib/mysql
+      - pgdata:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-prootpassword"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d restaurant_db"]
       interval: 5s
       timeout: 5s
       retries: 20
@@ -24,7 +24,7 @@ services:
       - restaurant-net
 
 volumes:
-  mysql-data:
+  pgdata:
 
 networks:
   restaurant-net:

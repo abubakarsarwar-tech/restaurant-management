@@ -1,12 +1,14 @@
 # 🍽️ Saffron Table — Restaurant Ordering Platform
 
 A production-grade restaurant ordering web application (customer website +
-admin dashboard + MySQL), engineered in the spirit of Uber Eats / FoodPanda /
-modern restaurant POS systems.
+admin dashboard + PostgreSQL), engineered in the spirit of Uber Eats /
+FoodPanda / modern restaurant POS systems.
 
-> **Status: Part 1 — Foundation.** Architecture, toolchain, design system,
-> providers, design tokens and conventions are done and verified
-> (typecheck ✓ lint ✓ build ✓). Features land in subsequent parts.
+> **Status: Part 2 — Database Architecture.** Foundation (Part 1 ✓) plus a
+> complete multi-tenant schema — 44 tables, 15 enums, 89 indexes — designed,
+> migrated and seeded with Drizzle ORM on PostgreSQL. Verified:
+> typecheck ✓ lint ✓ build ✓ drizzle-kit check ✓. Features land in
+> subsequent parts.
 
 ---
 
@@ -25,11 +27,11 @@ today, safer at scale tomorrow, and easier to hire for always?_
 
 ### Data & state
 
-| Choice                 | Why                                                                                                                                                                                                                                             | Scalability & future expansion                                                                                                                                                                                        |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **MySQL 8 + Prisma 7** | Relational integrity is non-negotiable for orders/payments (ACID transactions, FKs, reporting joins). Prisma gives a fully-typed client, migrations, and Studio. Prisma 7's Rust-free client + driver adapters lightens serverless cold starts. | Indexing/cursors scale browsing into the millions of rows; driver adapters let us switch pooling strategy (proxy, read replicas) by config, not code. Horizontal read scaling and Pg-compatible warehouses stay open. |
-| **TanStack Query 5**   | Server state (menu, orders, analytics) needs caching, invalidation, retries, optimistic updates — not hand-rolled fetches. Devtools included.                                                                                                   | Query key conventions scale to hundreds of endpoints; infinite queries handle "thousands of products" browsing without OFFSET pain.                                                                                   |
-| **Zustand 5**          | Client state (cart, UI toggles) should be tiny, fast and framework-agnostic — no Provider pyramid. Selectors prevent rerenders; `persist` middleware saves the cart to localStorage for free.                                                   | Cart items are cents-integers today; multi-vendor/multi-tenant carts later are just another slice + selector.                                                                                                         |
+| Choice                                                                       | Why                                                                                                                                                                                                                                                                  | Scalability & future expansion                                                                                                         |
+| ---------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **PostgreSQL 17 + Drizzle ORM** (adopted in Part 2, supersedes MySQL/Prisma) | Relational integrity is non-negotiable for orders/payments (ACID, FKs, reporting joins) — and Postgres adds native enums, CHECKs, partial indexes, jsonb and a PostGIS path. Drizzle's schema-is-TypeScript model means zero codegen and SQL you actually recognize. | Partitioning, RLS tenant isolation, read replicas and tenant-hash sharding are all schema-compatible futures — see `docs/DATABASE.md`. |
+| **TanStack Query 5**                                                         | Server state (menu, orders, analytics) needs caching, invalidation, retries, optimistic updates — not hand-rolled fetches. Devtools included.                                                                                                                        | Query key conventions scale to hundreds of endpoints; infinite queries handle "thousands of products" browsing without OFFSET pain.    |
+| **Zustand 5**                                                                | Client state (cart, UI toggles) should be tiny, fast and framework-agnostic — no Provider pyramid. Selectors prevent rerenders; `persist` middleware saves the cart to localStorage for free.                                                                        | Cart items are cents-integers today; multi-vendor/multi-tenant carts later are just another slice + selector.                          |
 
 ### Forms, media & motion
 
@@ -63,18 +65,19 @@ workspaces future-proof a `apps/web + packages/ui` split if we ever need it.
 ## 2 · Quick start
 
 ```bash
-# 1. prerequisites: Node ≥ 20.9, pnpm 10 (corepack enable), Docker (for MySQL)
+# 1. prerequisites: Node ≥ 20.9, pnpm 10 (corepack enable), Docker (for PostgreSQL)
 corepack enable
 
 # 2. install + env
 pnpm install
 cp .env.example .env      # fill in values (see docs/ENVIRONMENT.md)
 
-# 3. start MySQL 8 (Docker) — or point DATABASE_URL at your own instance
+# 3. start PostgreSQL 17 (Docker) — or point DATABASE_URL at your own instance
 pnpm db:up
 
-# 4. generate the Prisma client (required once, and after schema changes)
-pnpm db:generate
+# 4. database: apply migrations, then (optionally) seed the demo dataset
+pnpm db:migrate
+pnpm db:seed
 
 # 5. run
 pnpm dev                  # http://localhost:3000
@@ -100,7 +103,8 @@ envelope.
 | `components/` | Shared UI — `ui/` primitives (shadcn), `layout/` chrome, `shared/` widgets        |
 | `features/`   | Business slices (menu, cart, checkout, orders, admin…) — see `features/README.md` |
 | `hooks/`      | Cross-feature React hooks (`use-debounce`, `use-media-query`, …)                  |
-| `lib/`        | Core infrastructure: prisma, jwt, hashing, cloudinary, fonts, `cn`                |
+| `lib/`        | Core infrastructure: jwt, hashing, cloudinary, fonts, `cn`                        |
+| `db/`         | Drizzle schema (12 domain files), client singleton, migrations, seed              |
 | `providers/`  | Client context composition root (theme, query, toaster)                           |
 | `services/`   | Typed API client + feature service entry points                                   |
 | `store/`      | Zustand client state (cart w/ persistence, UI)                                    |
@@ -108,9 +112,10 @@ envelope.
 | `utils/`      | Pure formatters/helpers (money is CENTS, always)                                  |
 | `config/`     | Zod-validated env, site + navigation registries                                   |
 | `middleware/` | Composable middleware factories (`chain`)                                         |
-| `prisma/`     | Schema (empty in Part 1), config, future migrations & seed                        |
+| `middleware/` | Composable middleware factories (`chain`) for root `middleware.ts`                |
 
 ➡️ Deep dives: [Architecture](docs/ARCHITECTURE.md) ·
+[Database](docs/DATABASE.md) ·
 [Design System](docs/DESIGN-SYSTEM.md) ·
 [Environment](docs/ENVIRONMENT.md) ·
 [Git Workflow](docs/GIT-WORKFLOW.md)
@@ -129,9 +134,10 @@ envelope.
 - **Theming:** never hardcode colors — use tokens (`bg-primary`,
   `text-muted-foreground`, `shadow-lift`, `container-app`).
 
-## 5 · Roadmap (Parts 2+)
+## 5 · Roadmap (Parts 3+)
 
-Auth (JWT sessions, roles) → Menu/Categories (models + CRUD + Cloudinary
-uploads) → Cart & Checkout (drawer, order placement) → Orders (tracking,
-status pipeline) → Admin Dashboard (KDS, analytics, settings) → hardening
-(rate limiting, observability, E2E).
+~~Foundation~~ ✓ → ~~Database architecture~~ ✓ → Auth (JWT sessions, role
+guards over the RBAC schema) → Menu/Categories (menu API + Cloudinary uploads)
+→ Cart & Checkout (drawer, order placement onto the orders pipeline) → Orders
+(live tracking via `order_status_events`) → Admin Dashboard (KDS, analytics,
+settings) → hardening (rate limiting, observability, E2E).

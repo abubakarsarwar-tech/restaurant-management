@@ -18,8 +18,8 @@ const serverSchema = z.object({
 
   // --- Database
   DATABASE_URL: z.url({
-    protocol: /^mysql$/,
-    error: "DATABASE_URL must be a valid mysql:// connection string",
+    protocol: /^postgres(ql)?$/,
+    error: "DATABASE_URL must be a valid postgresql:// connection string",
   }),
   DIRECT_URL: z.url().optional(), // for future pooled/proxy setups
 

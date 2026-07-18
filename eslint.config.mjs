@@ -43,7 +43,7 @@ const eslintConfig = [
       "build/**",
       "coverage/**",
       "next-env.d.ts",
-      "lib/generated/**",
+      "db/migrations/meta/**",
     ],
   },
 ];
